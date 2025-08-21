@@ -1,24 +1,62 @@
-fun calculateDiscountPrice(price: Double, discount: Double): Double {
-    return price - (price * discount / 100)
-}
-
-// Returns the discount percentage associated with a redeem code.
-// Unknown or invalid codes return 0.0 (no discount).
-fun redeemCode(code: String): Double {
-    return when (code.trim().uppercase()) {
-        "SAVE10" -> 10.0
-        "SAVE20" -> 20.0
-        "SAVE40" -> 40.0
-        "WELCOME5" -> 5.0
-        "VIP30" -> 30.0
-        else -> 0.0
+fun findMissingRanges(frames: List<Int>): Map<String, Any?> {
+    if (frames.isEmpty()) {
+        return mapOf(
+            "gaps" to emptyList<List<Int>>(),
+            "longest_gap" to null,
+            "missing_count" to 0
+        )
     }
+
+    // Step 1: Find max frame number
+    var maxFrame = 0
+    for (f in frames) {
+        if (f > maxFrame) maxFrame = f
+    }
+
+    // Step 2: Mark received frames
+    val received = BooleanArray(maxFrame + 1)
+    for (f in frames) {
+        if (f > 0) received[f] = true
+    }
+
+    val gaps = mutableListOf<List<Int>>()
+    var missingCount = 0
+    var longestGap: List<Int>? = null
+    var longestGapSize = 0
+
+    // Step 3: Traverse to detect missing ranges
+    // Find all missing frame ranges in a simple, readable way
+    var i = 1
+    while (i <= maxFrame) {
+        if (!received[i]) {
+            val start = i
+            // Move i forward until we find a received frame or reach the end
+            while (i < maxFrame && !received[i + 1]) {
+                i++
+            }
+            val end = i
+            gaps.add(listOf(start, end))
+
+            val size = end - start + 1
+            missingCount += size
+            if (size > longestGapSize) {
+                longestGapSize = size
+                longestGap = listOf(start, end)
+            }
+        }
+        i++
+    }
+
+    return mapOf(
+        "gaps" to gaps,
+        "longest_gap" to longestGap,
+        "missing_count" to missingCount
+    )
 }
 
-// Example usage
+// ------------------ Test ------------------
 fun main() {
-    val code = "SAVE10"
-    val discount = redeemCode(code)
-    val priceWithCode = calculateDiscountPrice(price = 70.0, discount = discount)
-    println("The price after applying code '$code' is: $priceWithCode")
+    val frames = listOf(1, 2, 3, 5, 6, 10, 11, 16)
+    val result = findMissingRanges(frames)
+    println(result)
 }
