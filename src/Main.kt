@@ -1,4 +1,5 @@
 fun findMissingRanges(frames: List<Int>): Map<String, Any?> {
+    // Handle empty input case with default values
     if (frames.isEmpty()) {
         return mapOf(
             "gaps" to emptyList<List<Int>>(),
@@ -9,15 +10,21 @@ fun findMissingRanges(frames: List<Int>): Map<String, Any?> {
 
     // Step 1: Find max frame number
     var maxFrame = 0
-    for (f in frames) {
-        if (f > maxFrame) maxFrame = f
+    for (frame in frames) {
+        if (frame > maxFrame) maxFrame = frame
     }
 
-    // Step 2: Mark received frames
+    // Step 2: // Create a boolean array to track received frames (index 0 is unused since frames start at 1)
     val received = BooleanArray(maxFrame + 1)
-    for (f in frames) {
-        if (f > 0) received[f] = true
+    for (frame in frames) {
+        if (frame > 0) received[frame] = true
     }
+
+ // Initialize variables to store:
+// - gaps: list of all missing frame ranges, each range as [start, end]
+// - missingCount: total number of missing frames
+// - longestGap: range of the largest continuous missing frames sequence
+// - longestGapSize: size of the longest gap
 
     val gaps = mutableListOf<List<Int>>()
     var missingCount = 0
@@ -26,15 +33,15 @@ fun findMissingRanges(frames: List<Int>): Map<String, Any?> {
 
     // Step 3: Traverse to detect missing ranges
     // Find all missing frame ranges in a simple, readable way
-    var i = 1
-    while (i <= maxFrame) {
-        if (!received[i]) {
-            val start = i
-            // Move i forward until we find a received frame or reach the end
-            while (i < maxFrame && !received[i + 1]) {
-                i++
+   var frameIndex = 1
+    while (frameIndex <= maxFrame) {
+        if (!received[frameIndex]) {
+            val start = frameIndex
+            // Move frameIndex forward until we find a received frame or reach the end
+            while (frameIndex < maxFrame && !received[frameIndex + 1]) {
+                frameIndex++
             }
-            val end = i
+            val end = frameIndex
             gaps.add(listOf(start, end))
 
             val size = end - start + 1
@@ -44,7 +51,7 @@ fun findMissingRanges(frames: List<Int>): Map<String, Any?> {
                 longestGap = listOf(start, end)
             }
         }
-        i++
+        frameIndex++
     }
 
     return mapOf(
@@ -54,7 +61,7 @@ fun findMissingRanges(frames: List<Int>): Map<String, Any?> {
     )
 }
 
-// ------------------ Test ------------------
+// ------------------------------------
 fun main() {
     val frames = listOf(1, 2, 3, 5, 6, 10, 11, 16)
     val result = findMissingRanges(frames)
